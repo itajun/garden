@@ -47,17 +47,7 @@ public class GardenApplication implements CommandLineRunner
     @Override
     public void run(String... args) throws Exception {
         callbackProcessor.scheduleCleanup();
-        serialProcessor.spinUp();
         commandProcessor.readConsole();
     }
 
-    @Bean
-    public Executor asyncExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setQueueCapacity(500);
-        executor.setThreadNamePrefix("GardenAsyncExecutor-");
-        executor.initialize();
-        return executor;
-    }
 }

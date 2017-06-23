@@ -77,6 +77,7 @@ public class EMailProcessor
 
             final Context ctx = new Context();
             ctx.setVariables(context);
+            ctx.setVariable("user", user);
             final String subject = this.templateEngine.process(template.subject, ctx);
             message.setSubject(subject);
             final String htmlContent = this.templateEngine.process(template.fileName, ctx);
@@ -92,7 +93,7 @@ public class EMailProcessor
 
     public enum EMailTemplate {
         TEST("text/test.txt", "Testing connection"),
-        GOOD_MORNING("text/good-morning.html", "Good morning ${user}");
+        SUMMARY("text/summary.txt", "Garden summary");
 
         private String fileName;
         private String subject;

@@ -18,7 +18,7 @@ public class EMailConfig
 
     private String host; // email.host
 
-    private String port = "25"; // email.port
+    private int port = 25; // email.port
 
     private String protocol = "smtp"; // email.protocol
 
@@ -30,10 +30,10 @@ public class EMailConfig
     public JavaMailSenderImpl javaMailSender() {
         JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
         javaMailSender.setHost(host);
-        javaMailSender.setPassword(port);
+        javaMailSender.setPort(port);
         javaMailSender.setProtocol(protocol);
         javaMailSender.setUsername(username);
-        javaMailSender.setProtocol(password);
+        javaMailSender.setPassword(password);
 
         final Properties javaMailProperties = new Properties();
         try
@@ -59,12 +59,12 @@ public class EMailConfig
         this.host = host;
     }
 
-    public String getPort()
+    public int getPort()
     {
         return port;
     }
 
-    public void setPort(String port)
+    public void setPort(int port)
     {
         this.port = port;
     }

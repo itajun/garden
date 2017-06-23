@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,10 @@ public class CommandProcessor
                 .omitEmptyStrings()
                 .trimResults()
                 .splitToList(line));
+        if (tokens.size() == 0) {
+            LOGGER.warn("Strange... Empty line received...");
+            return;
+        }
         String commandName = tokens.remove(0);
         Command command = getCommandFor(commandName);
         // First item was already removed. Only params are passed

@@ -10,11 +10,11 @@ import java.util.List;
 /**
  * Just echoes the params back. Used for tests
  */
-@Component(value = "command.echo")
+@Component(value = "command.test_echo")
 @Scope("prototype")
-public class CommandEcho implements Command
+public class TestCommandEcho implements Command
 {
-    private static final Logger LOGGER = Logger.getLogger(CommandEcho.class);
+    private static final Logger LOGGER = Logger.getLogger(TestCommandEcho.class);
 
     @Override
     public void execute(List<String> payload)

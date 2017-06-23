@@ -11,13 +11,13 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Just echoes the params back. Used for tests
+ * Sends the test e-mail
  */
-@Component(value = "command.send_email")
+@Component(value = "command.test_send_email")
 @Scope("prototype")
-public class CommandSendEMail implements Command
+public class TestCommandSendEMail implements Command
 {
-    private static final Logger LOGGER = Logger.getLogger(CommandSendEMail.class);
+    private static final Logger LOGGER = Logger.getLogger(TestCommandSendEMail.class);
 
     @Autowired
     private EMailProcessor eMailProcesor;
@@ -26,9 +26,6 @@ public class CommandSendEMail implements Command
     @Async
     public void execute(List<String> payload)
     {
-        EMailProcessor.EMailTemplate template =
-                payload.size() > 0 ? EMailProcessor.EMailTemplate.valueOf(payload.get(0))
-                                   : EMailProcessor.EMailTemplate.TEST;
-        eMailProcesor.sendEMail(template, Collections.emptyMap());
+        eMailProcesor.sendEMail(EMailProcessor.EMailTemplate.TEST, Collections.emptyMap());
     }
 }

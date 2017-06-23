@@ -1,0 +1,16 @@
+Hi [[${user}]],
+
+This is your update since [[*{lastUpdate}?: 'EVER']].
+
+Some stats for this last period:
+
+Average humidity: [[*{averageHumidity}?: 'N/A']]
+Average temperature: [[*{averageTemperature}?: 'N/A']]
+Average light incidence: [[*{averageLightIncidence}?: 'N/A']]
+Average watering time: [[*{averageWateringTime / 1000}?: 'N/A']]
+
+I'll keep you posted.
+
+Cheers,
+
+Garden App

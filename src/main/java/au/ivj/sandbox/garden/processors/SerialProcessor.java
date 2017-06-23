@@ -120,11 +120,16 @@ public class SerialProcessor
         this.dataRate = dataRate;
     }
 
-    @Async
-    public void spinUp() {
-        LOGGER.info("Will open port " + port);
-        LOGGER.info("Will timeout " + timeout);
-
+    public void sendCommand(String command) {
+        try {
+            synchronized (output) {
+                output.write(command);
+                output.newLine();
+                output.flush();
+            }
+        } catch (IOException e) {
+            LOGGER.error("Couldn't send command to Arduino", e);
+        }
     }
 
     @PreDestroy

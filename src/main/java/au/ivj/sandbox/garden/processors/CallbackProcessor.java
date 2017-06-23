@@ -22,7 +22,7 @@ public class CallbackProcessor
 {
     private static final Logger LOGGER = Logger.getLogger(CallbackProcessor.class);
 
-    private static long CALLBACK_TIMEOUT = 60; // 1 minute and we give up
+    private static long CALLBACK_TIMEOUT = 60 * 5; // 5 minutes and we give up
 
     private ConcurrentMap<String, Callback> unreadCallbacks = new ConcurrentHashMap<>();
 
