@@ -1,17 +1,17 @@
 package au.ivj.sandbox.garden.processors;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
-import javax.annotation.PostConstruct;
 import javax.mail.internet.MimeMessage;
-import java.io.IOException;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Sends e-mails.
@@ -22,95 +22,17 @@ public class EMailProcessor
 {
     private static final Logger LOGGER = Logger.getLogger(EMailProcessor.class);
 
-    private String host; // email.host
-
-    private String port = "25"; // email.port
-
-    private String protocol = "smtp"; // email.protocol
-
-    private String username; // email.username
-
-    private String password; // email.password
-
     private String from; // email.from
 
     private String to; // email.to
 
-    private JavaMailSenderImpl javaMailSender;
+    private String user; // email.user
 
+    @Autowired
+    private JavaMailSender javaMailSender;
 
-    @PostConstruct
-    public void createMailSender() {
-        LOGGER.debug("Creating mail sender");
-
-        javaMailSender = new JavaMailSenderImpl();
-        javaMailSender.setHost(host);
-        javaMailSender.setPassword(port);
-        javaMailSender.setProtocol(protocol);
-        javaMailSender.setUsername(username);
-        javaMailSender.setProtocol(password);
-
-        final Properties javaMailProperties = new Properties();
-        try
-        {
-            javaMailProperties.load(EMailProcessor.class.getResourceAsStream("/javamail.properties"));
-        }
-        catch (IOException e)
-        {
-            LOGGER.warn("Couldn't open javamail.properties. Proceeding with default.", e);
-        }
-        javaMailSender.setJavaMailProperties(javaMailProperties);
-    }
-
-    public String getHost()
-    {
-        return host;
-    }
-
-    public void setHost(String host)
-    {
-        this.host = host;
-    }
-
-    public String getPort()
-    {
-        return port;
-    }
-
-    public void setPort(String port)
-    {
-        this.port = port;
-    }
-
-    public String getProtocol()
-    {
-        return protocol;
-    }
-
-    public void setProtocol(String protocol)
-    {
-        this.protocol = protocol;
-    }
-
-    public String getUsername()
-    {
-        return username;
-    }
-
-    public void setUsername(String username)
-    {
-        this.username = username;
-    }
-
-    public String getPassword()
-    {
-        return password;
-    }
-
-    public void setPassword(String password)
-    {
-        this.password = password;
-    }
+    @Autowired
+    private TemplateEngine templateEngine;
 
     public String getFrom()
     {
@@ -132,9 +54,19 @@ public class EMailProcessor
         this.to = to;
     }
 
+    public String getUser()
+    {
+        return user;
+    }
+
+    public void setUser(String user)
+    {
+        this.user = user;
+    }
+
     @Async
     public void sendEMail(EMailTemplate template, Map context) {
-        LOGGER.debug(String.format("Sending e-mail %s with params %s", template, context));
+        LOGGER.debug(String.format("Sending e-mail template %s with params %s", template, context));
 
         try
         {
@@ -142,25 +74,32 @@ public class EMailProcessor
             final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
             message.setFrom(from);
             message.setTo(to);
-            message.setSubject(template.subject);
-            message.setText(template.path);
+
+            final Context ctx = new Context();
+            ctx.setVariables(context);
+            final String subject = this.templateEngine.process(template.subject, ctx);
+            message.setSubject(subject);
+            final String htmlContent = this.templateEngine.process(template.fileName, ctx);
+            message.setText(htmlContent);
+
             this.javaMailSender.send(mimeMessage);
         }
         catch (Exception e)
         {
-            LOGGER.error("Damn! Error sending e-mail", e);
+            LOGGER.error("Damn! Error sending e-templates", e);
         }
     }
 
     public enum EMailTemplate {
-        TEST("/templates/email/test.txt", "Testing connection");
+        TEST("text/test.txt", "Testing connection"),
+        GOOD_MORNING("text/good-morning.html", "Good morning ${user}");
 
-        private String path;
+        private String fileName;
         private String subject;
 
-        EMailTemplate(String path, String subject)
+        EMailTemplate(String fileName, String subject)
         {
-            this.path = path;
+            this.fileName = fileName;
             this.subject = subject;
         }
     }
