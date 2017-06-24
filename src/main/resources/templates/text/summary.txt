@@ -1,13 +1,14 @@
 Hi [[${user}]],
 
-This is your update since [[*{lastUpdate}?: 'EVER']].
+This is your update since [[*{lastUpdate} ? ${#dates.format(lastUpdate, "HH:mm:ss dd/MM/yyyy")} : 'EVER']].
 
 Some stats for this last period:
 
 Average humidity: [[*{averageHumidity}?: 'N/A']]
 Average temperature: [[*{averageTemperature}?: 'N/A']]
 Average light incidence: [[*{averageLightIncidence}?: 'N/A']]
-Average watering time: [[*{averageWateringTime / 1000}?: 'N/A']]
+Average watering time: [[*{averageWateringTime}?: 'N/A']]
+Communication fails: [[*{pingFails}?: 'None']]
 
 I'll keep you posted.
 

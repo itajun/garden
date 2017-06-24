@@ -32,10 +32,12 @@ public class CommandSendSummaryEMail implements Command
     public void execute(List<String> payload)
     {
         Map<String, Object> context = new HashMap<>();
+        context.put("lastUpdate", lastSummaryEmail == 0 ? null : new Date(lastSummaryEmail));
         context.put("averageHumidity", avarageHumidity());
-        context.put("averageLightIncidence", null);
+        context.put("averageLightIncidence", avarageLightIncidence());
         context.put("averageTemperature", null);
         context.put("averageWateringTime", avarageWateringTime());
+        context.put("pingFails", pingFails());
         eMailProcesor.sendEMail(EMailProcessor.EMailTemplate.SUMMARY, context);
         lastSummaryEmail = System.currentTimeMillis();
     }
@@ -53,6 +55,19 @@ public class CommandSendSummaryEMail implements Command
         }
     }
 
+    private Long avarageLightIncidence() {
+        try {
+            return jdbcTemplate
+                    .queryForObject("SELECT AVG(READING_VALUE) FROM LIGHT_LOG WHERE READING_TIME >= :LAST_READING",
+                            ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)),
+                            Long.class
+                    );
+        } catch (Exception e) {
+            LOGGER.error("Error fetching humidity", e);
+            return null;
+        }
+    }
+
     private Long avarageWateringTime() {
         try {
             return jdbcTemplate
@@ -61,7 +76,20 @@ public class CommandSendSummaryEMail implements Command
                             Long.class
                     );
         } catch (Exception e) {
-            LOGGER.error("Error fetching humidity", e);
+            LOGGER.error("Error fetching watering time", e);
+            return null;
+        }
+    }
+
+    private Long pingFails() {
+        try {
+            return jdbcTemplate
+                    .queryForObject("SELECT COUNT(COMMAND_TIME) FROM PING_FAILS WHERE COMMAND_TIME >= :LAST_READING",
+                            ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)),
+                            Long.class
+                    );
+        } catch (Exception e) {
+            LOGGER.error("Error fetching ping fails", e);
             return null;
         }
     }

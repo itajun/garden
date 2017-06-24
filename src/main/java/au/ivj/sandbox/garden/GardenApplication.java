@@ -46,7 +46,6 @@ public class GardenApplication implements CommandLineRunner
 
     @Override
     public void run(String... args) throws Exception {
-        callbackProcessor.scheduleCleanup();
         commandProcessor.readConsole();
     }
 

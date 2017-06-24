@@ -3,12 +3,15 @@ package au.ivj.sandbox.garden.commands;
 import au.ivj.sandbox.garden.processors.CallbackProcessor;
 import au.ivj.sandbox.garden.processors.SerialProcessor;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,6 +30,9 @@ public class CommandPing implements Command
     @Autowired
     private SerialProcessor serialProcessor;
 
+    @Autowired
+    private NamedParameterJdbcTemplate jdbcTemplate;
+
     @Override
     @Async
     public void execute(List<String> payload)
@@ -39,6 +45,14 @@ public class CommandPing implements Command
             LOGGER.info("Great! Gotta a pong back " + commandCallback.get());
         } else {
             LOGGER.info("Ouch! Didn't receive a pong " + uniqueId);
+
+            jdbcTemplate
+                    .update("INSERT INTO PING_FAILS(COMMAND_TIME) VALUES (:COMMAND_TIME)",
+                            ImmutableMap.<String, Object> builder()
+                                    .put("COMMAND_TIME", new Date())
+                                    .build()
+                    );
+
         }
     }
 }
