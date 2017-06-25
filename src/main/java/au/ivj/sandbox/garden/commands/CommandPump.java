@@ -54,6 +54,9 @@ public class CommandPump implements Command
     public void execute(List<String> payload)
     {
         Date commandTime = new Date();
+
+        LOGGER.info(String.format("Working on pump %s", payload.get(0)));
+
         LOGGER.debug(String.format("Turning pump %s FW", payload.get(0)));
         serialProcessor.sendCommand(String.format("pump_%s fw", payload.get(0)));
         try {

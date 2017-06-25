@@ -38,7 +38,7 @@ public class CommandLogHumidity implements Command
             return;
         }
 
-        LOGGER.debug("Will store humidity to DB " + value);
+        LOGGER.info("Will store humidity to DB " + value);
 
         lastOneStored = System.currentTimeMillis();
 

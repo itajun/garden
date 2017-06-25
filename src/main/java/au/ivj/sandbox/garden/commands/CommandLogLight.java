@@ -38,7 +38,7 @@ public class CommandLogLight implements Command
             return;
         }
 
-        LOGGER.debug("Will store light incidence to DB " + value);
+        LOGGER.info("Will store light incidence to DB " + value);
 
         lastOneStored = System.currentTimeMillis();
 

@@ -44,7 +44,7 @@ public class CommandPing implements Command
         if (commandCallback.isPresent()) {
             LOGGER.info("Great! Gotta a pong back " + commandCallback.get());
         } else {
-            LOGGER.info("Ouch! Didn't receive a pong " + uniqueId);
+            LOGGER.warn("Ouch! Didn't receive a pong " + uniqueId);
 
             jdbcTemplate
                     .update("INSERT INTO PING_FAILS(COMMAND_TIME) VALUES (:COMMAND_TIME)",
