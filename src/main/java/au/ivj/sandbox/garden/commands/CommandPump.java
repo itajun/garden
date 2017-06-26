@@ -23,9 +23,9 @@ public class CommandPump implements Command
 {
     private static final Logger LOGGER = Logger.getLogger(CommandPump.class);
 
-    private int fwPeriod; // pump.fwPeriod
+    private int period; // pump.period
 
-    private int bwPeriod; // pump.bwPeriod
+    private String direction; // pump.direction
 
     @Autowired
     private SerialProcessor serialProcessor;
@@ -33,20 +33,20 @@ public class CommandPump implements Command
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
 
-    public int getFwPeriod() {
-        return fwPeriod;
+    public int getPeriod() {
+        return period;
     }
 
-    public void setFwPeriod(int fwPeriod) {
-        this.fwPeriod = fwPeriod;
+    public void setPeriod(int period) {
+        this.period = period;
     }
 
-    public int getBwPeriod() {
-        return bwPeriod;
+    public String getDirection() {
+        return direction;
     }
 
-    public void setBwPeriod(int bwPeriod) {
-        this.bwPeriod = bwPeriod;
+    public void setDirection(String direction) {
+        this.direction = direction;
     }
 
     @Override
@@ -54,33 +54,28 @@ public class CommandPump implements Command
     public void execute(List<String> payload)
     {
         Date commandTime = new Date();
+        String pump = payload.get(0);
 
-        LOGGER.info(String.format("Working on pump %s", payload.get(0)));
+        LOGGER.info(String.format("Turning pump %s ON", pump));
 
-        LOGGER.debug(String.format("Turning pump %s FW", payload.get(0)));
-        serialProcessor.sendCommand(String.format("pump_%s fw", payload.get(0)));
+        LOGGER.debug(String.format("Turning pump %s %s", pump, direction));
+        serialProcessor.sendCommand(String.format("pump_%s %s", pump, direction));
         try {
-            Thread.sleep(fwPeriod);
+            Thread.sleep(period);
         } catch (InterruptedException e) {
             LOGGER.warn("Hum... I couldn't sleep...");
         }
-        LOGGER.debug(String.format("Turning pump %s BW", payload.get(0)));
-        serialProcessor.sendCommand(String.format("pump_%s bw", payload.get(0)));
-        try {
-            Thread.sleep(bwPeriod);
-        } catch (InterruptedException e) {
-            LOGGER.warn("Hum... I couldn't sleep...");
-        }
-        LOGGER.debug(String.format("Turning pump %s OFF", payload.get(0)));
-        serialProcessor.sendCommand(String.format("pump_%s off", payload.get(0)));
+
+        LOGGER.debug(String.format("Turning pump %s OFF", pump));
+        serialProcessor.sendCommand(String.format("pump_%s off", pump));
 
         jdbcTemplate
-                .update("INSERT INTO PUMP_COMMANDS(COMMAND_TIME, PERIOD) VALUES (:COMMAND_TIME, :PERIOD)",
+                .update("INSERT INTO PUMP_COMMANDS(COMMAND_TIME, PUMP, PERIOD) VALUES (:COMMAND_TIME, :PUMP, :PERIOD)",
                         ImmutableMap.<String, Object> builder()
                                 .put("COMMAND_TIME", commandTime)
-                                .put("PERIOD", fwPeriod)
+                                .put("PUMP", pump)
+                                .put("PERIOD", period)
                                 .build()
                 );
-
     }
 }
