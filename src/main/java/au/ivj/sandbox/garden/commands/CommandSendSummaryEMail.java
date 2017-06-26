@@ -5,10 +5,13 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -68,12 +71,17 @@ public class CommandSendSummaryEMail implements Command
         }
     }
 
-    private Long avarageWateringTime() {
+    private List<Map.Entry<String, Long>> avarageWateringTime() {
         try {
             return jdbcTemplate
-                    .queryForObject("SELECT AVG(PERIOD) FROM PUMP_COMMANDS WHERE COMMAND_TIME >= :LAST_READING",
+                    .query("SELECT PUMP, AVG(PERIOD) FROM PUMP_COMMANDS WHERE COMMAND_TIME >= :LAST_READING GROUP BY PUMP",
                             ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)),
-                            Long.class
+                            new RowMapper<Map.Entry<String, Long>>() {
+                                @Override
+                                public Map.Entry<String, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
+                                    return new AbstractMap.SimpleImmutableEntry<String, Long>(resultSet.getString(1), resultSet.getLong(2));
+                                }
+                            }
                     );
         } catch (Exception e) {
             LOGGER.error("Error fetching watering time", e);

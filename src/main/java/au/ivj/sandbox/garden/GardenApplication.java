@@ -18,6 +18,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 
+/**
+ * Main app
+ */
 @SpringBootApplication
 @EnableAutoConfiguration
 @EnableAsync

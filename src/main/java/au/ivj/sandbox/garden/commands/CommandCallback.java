@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Just echoes the params back. Used for tests
+ * Called with a payload for a waiting async command
  */
 @Component(value = "command.callback")
 @Scope("prototype")

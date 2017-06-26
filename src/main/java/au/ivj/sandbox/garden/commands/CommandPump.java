@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Turns a pump on/off
+ * Turns a pump on/off for a period defined in the {@link #period}
  */
 @Component(value = "command.pump")
 @Scope("prototype")
@@ -53,7 +53,6 @@ public class CommandPump implements Command
     @Async
     public void execute(List<String> payload)
     {
-        Date commandTime = new Date();
         String pump = payload.get(0);
 
         LOGGER.info(String.format("Turning pump %s ON", pump));
@@ -72,7 +71,7 @@ public class CommandPump implements Command
         jdbcTemplate
                 .update("INSERT INTO PUMP_COMMANDS(COMMAND_TIME, PUMP, PERIOD) VALUES (:COMMAND_TIME, :PUMP, :PERIOD)",
                         ImmutableMap.<String, Object> builder()
-                                .put("COMMAND_TIME", commandTime)
+                                .put("COMMAND_TIME", new Date())
                                 .put("PUMP", pump)
                                 .put("PERIOD", period)
                                 .build()

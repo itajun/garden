@@ -5,6 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+/**
+ * Config various scheduled services
+ */
 @Service
 public class ScheduleProcessor {
     private static final Logger LOGGER = Logger.getLogger(ScheduleProcessor.class);

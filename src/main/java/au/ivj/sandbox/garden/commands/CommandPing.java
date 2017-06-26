@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Pings arduino and waits for pong
+ * Pings Arduino and waits for pong
  */
 @Component(value = "command.ping")
 @Scope("prototype")
