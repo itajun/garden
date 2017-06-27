@@ -11,12 +11,12 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Logs the light level received from the sensor
+ * Logs the temperature level received from the sensor
  */
-@Component(value = "command.log_light")
-public class CommandLogLight implements Command
+@Component(value = "command.log_temperature")
+public class CommandLogTemperature implements Command
 {
-    private static final Logger LOGGER = Logger.getLogger(CommandLogLight.class);
+    private static final Logger LOGGER = Logger.getLogger(CommandLogTemperature.class);
 
     private static final int STORE_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
@@ -32,18 +32,19 @@ public class CommandLogLight implements Command
         int value = Integer.valueOf(payload.get(0));
         long waitFor = lastOneStored + STORE_INTERVAL - System.currentTimeMillis();
         if (waitFor > 0) {
-            LOGGER.debug(String.format("Received light update with %d, but won't store for another %d minutes",
+            LOGGER.debug(String.format("Received temperature update with %d, but won't store for another %d minutes",
                     value,
                     waitFor / 1000 / 60));
             return;
         }
 
-        LOGGER.info("Will store light incidence to DB " + value);
+        LOGGER.info("Will store humidity to DB " + value);
 
         lastOneStored = System.currentTimeMillis();
 
         jdbcTemplate
-                .update("INSERT INTO LIGHT_LOG(READING_TIME, READING_VALUE) VALUES (:READING_TIME, :READING_VALUE)",
+                .update("INSERT INTO TEMPERATURE_LOG(READING_TIME, READING_VALUE) VALUES (:READING_TIME, " +
+                                ":READING_VALUE)",
                         ImmutableMap.<String, Object> builder()
                                 .put("READING_TIME", new Date())
                                 .put("READING_VALUE", value)

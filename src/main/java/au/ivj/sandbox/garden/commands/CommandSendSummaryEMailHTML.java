@@ -83,6 +83,28 @@ public class CommandSendSummaryEMailHTML implements Command
         return result;
     }
 
+    private TimeSeries getTemperatureSeries() {
+        TimeSeries result = new TimeSeries("Temperature");
+        jdbcTemplate
+                .query("SELECT READING_TIME, READING_VALUE" +
+                                " FROM TEMPERATURE_LOG WHERE READING_TIME >= :STARTING_AT",
+                        ImmutableMap.of("STARTING_AT", getStartingAt()),
+                        new RowMapper<AbstractMap.Entry<Hour, Long>>() {
+                            @Override
+                            public Map.Entry<Hour, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
+                                return new AbstractMap.SimpleImmutableEntry<>(
+                                        new Hour(Date.from(resultSet.getTimestamp(1).toInstant().truncatedTo(ChronoUnit.HOURS))),
+                                        resultSet.getLong(2));
+                            }
+                        }
+                )
+                .stream()
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingLong(Map.Entry::getValue)))
+                .entrySet()
+                .forEach(e -> result.add(e.getKey(), e.getValue()));
+        return result;
+    }
+
     private TimeSeries getLightSeries() {
         TimeSeries result = new TimeSeries("Light");
         jdbcTemplate
@@ -176,6 +198,7 @@ public class CommandSendSummaryEMailHTML implements Command
         TimeSeriesCollection result = new TimeSeriesCollection();
         result.addSeries(getHumiditySeries());
         result.addSeries(getLightSeries());
+        result.addSeries(getTemperatureSeries());
         result.addSeries(getPingFailSeries());
         result.addSeries(getCommFailSeries());
         result.addSeries(getInputFailSeries());

@@ -41,7 +41,7 @@ public class CommandSendSummaryEMail implements Command
         context.put("lastUpdate", lastSummaryEmail == 0 ? null : new Date(lastSummaryEmail));
         context.put("averageHumidity", avarageHumidity());
         context.put("averageLightIncidence", avarageLightIncidence());
-        context.put("averageTemperature", null);
+        context.put("averageTemperature", avarageTemperature());
         context.put("averageWateringTime", avarageWateringTime());
         context.put("commandFails", commandFails());
         eMailProcesor.sendEMail(EMailProcessor.EMailTemplate.SUMMARY, context);
@@ -65,6 +65,20 @@ public class CommandSendSummaryEMail implements Command
         try {
             return jdbcTemplate
                     .queryForObject("SELECT AVG(READING_VALUE) FROM LIGHT_LOG WHERE READING_TIME >= :LAST_READING",
+                            ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)),
+                            Long.class
+                    );
+        } catch (Exception e) {
+            LOGGER.error("Error fetching humidity", e);
+            return null;
+        }
+    }
+
+    private Long avarageTemperature() {
+        try {
+            return jdbcTemplate
+                    .queryForObject("SELECT AVG(READING_VALUE) FROM TEMPERATURE_LOG WHERE READING_TIME >= " +
+                                    ":LAST_READING",
                             ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)),
                             Long.class
                     );
