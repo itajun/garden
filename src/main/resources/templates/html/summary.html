@@ -13,8 +13,14 @@
 </p>
 <p>Some stats for this last period:</p>
 <p>
-    <img src="stats.png" th:src="|cid:${imageResourceName}|" />
+    <img src="stats.png" th:src="|cid:chart|" />
 </p>
+<p>
+Average watering time: [[*{averageWateringTime.empty} ? 'N/A' : '']]
+</p>
+<ul>
+    <li th:each="entry : ${averageWateringTime}">- pump_[[ ${entry.key} ]]: [[ ${entry.value} ]]</li>
+</ul>
 <p>
     Cheers,
 </p>

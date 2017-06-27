@@ -20,6 +20,11 @@ public class ScheduleProcessor {
         commandProcessor.processLine("send_summary_email");
     }
 
+    @Scheduled(cron = "${schedule.email.summary_html.cron}")
+    public void summaryEMailHTML() {
+        commandProcessor.processLine("send_summary_email_html");
+    }
+
     @Scheduled(cron = "${schedule.water.pump_a.cron}")
     public void pumpA() {
         commandProcessor.processLine("pump a");

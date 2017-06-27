@@ -11,7 +11,11 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import javax.mail.internet.MimeMessage;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * Sends e-mails.
@@ -65,13 +69,13 @@ public class EMailProcessor
     }
 
     @Async
-    public void sendEMail(EMailTemplate template, Map context) {
+    public void sendEMail(EMailTemplate template, Map context, Consumer<MimeMessageHelper>... enrichers) {
         LOGGER.debug(String.format("Sending e-mail template %s with params %s", template, context));
 
         try
         {
             final MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
-            final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
+            final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true);
             message.setFrom(from);
             message.setTo(to);
 
@@ -81,7 +85,11 @@ public class EMailProcessor
             final String subject = this.templateEngine.process(template.subject, ctx);
             message.setSubject(subject);
             final String htmlContent = this.templateEngine.process(template.fileName, ctx);
-            message.setText(htmlContent);
+            message.setText(htmlContent, template.fileName.startsWith("html"));
+
+            Optional.ofNullable(enrichers)
+                    .map(e -> Arrays.asList(e))
+                    .ifPresent(e -> e.forEach(enricher -> enricher.accept(message)));
 
             this.javaMailSender.send(mimeMessage);
         }
