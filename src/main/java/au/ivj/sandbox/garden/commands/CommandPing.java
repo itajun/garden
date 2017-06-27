@@ -42,7 +42,7 @@ public class CommandPing implements Command
         LOGGER.debug("Waiting for pong " + uniqueId);
         Optional<Callback> commandCallback = callbackProcessor.waitForCallback(uniqueId, TIMEOUT);
         if (commandCallback.isPresent()) {
-            LOGGER.info("Great! Gotta a pong back " + commandCallback.get());
+            LOGGER.info("Great! Got a pong back " + commandCallback.get());
         } else {
             LOGGER.warn("Ouch! Didn't receive a pong " + uniqueId);
 
