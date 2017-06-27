@@ -93,7 +93,8 @@ public class EMailProcessor
 
     public enum EMailTemplate {
         TEST("text/test.txt", "Testing connection"),
-        SUMMARY("text/summary.txt", "Garden summary");
+        SUMMARY("text/summary.txt", "Garden summary"),
+        SUMMARY_HTML("html/summary.html", "Garden summary - Charts");
 
         private String fileName;
         private String subject;

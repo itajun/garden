@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:remove="all">Template for summary e-mail with chart</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<p>
+    Hello [[${user}]]!
+</p>
+<p>
+    This is your update since [[*{lastUpdate} ? ${#dates.format(lastUpdate, "HH:mm:ss dd/MM/yyyy")} : 'EVER']].
+</p>
+<p>Some stats for this last period:</p>
+<p>
+    <img src="stats.png" th:src="|cid:${imageResourceName}|" />
+</p>
+<p>
+    Cheers,
+</p>
+<p>
+    Garden App
+</p>
+</body>
+</html>
