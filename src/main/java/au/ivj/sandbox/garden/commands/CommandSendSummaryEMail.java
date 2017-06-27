@@ -4,7 +4,6 @@ import au.ivj.sandbox.garden.processors.EMailProcessor;
 import com.google.common.collect.ImmutableMap;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -12,7 +11,11 @@ import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Sends the summary e-mail
@@ -40,7 +43,7 @@ public class CommandSendSummaryEMail implements Command
         context.put("averageLightIncidence", avarageLightIncidence());
         context.put("averageTemperature", null);
         context.put("averageWateringTime", avarageWateringTime());
-        context.put("pingFails", pingFails());
+        context.put("commandFails", commandFails());
         eMailProcesor.sendEMail(EMailProcessor.EMailTemplate.SUMMARY, context);
         lastSummaryEmail = System.currentTimeMillis();
     }
@@ -89,15 +92,16 @@ public class CommandSendSummaryEMail implements Command
         }
     }
 
-    private Long pingFails() {
+    private Long commandFails() {
         try {
             return jdbcTemplate
-                    .queryForObject("SELECT COUNT(COMMAND_TIME) FROM PING_FAILS WHERE COMMAND_TIME >= :LAST_READING",
+                    .queryForObject("SELECT COUNT(COMMAND_TIME) FROM COMMUNICATION_FAILS WHERE COMMAND_TIME >= " +
+                                    ":LAST_READING",
                             ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)),
                             Long.class
                     );
         } catch (Exception e) {
-            LOGGER.error("Error fetching ping fails", e);
+            LOGGER.error("Error fetching command fails", e);
             return null;
         }
     }

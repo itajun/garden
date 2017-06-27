@@ -105,10 +105,80 @@ public class CommandSendSummaryEMailHTML implements Command
         return result;
     }
 
+    private TimeSeries getPingFailSeries() {
+        TimeSeries result = new TimeSeries("Ping fails");
+        jdbcTemplate
+                .query("SELECT COMMAND_TIME" +
+                                " FROM COMMUNICATION_FAILS WHERE COMMAND_TIME >= :STARTING_AT AND COMMAND LIKE 'ping%'",
+                        ImmutableMap.of("STARTING_AT", getStartingAt()),
+                        new RowMapper<AbstractMap.Entry<Hour, Long>>() {
+                            @Override
+                            public Map.Entry<Hour, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
+                                return new AbstractMap.SimpleImmutableEntry<>(
+                                        new Hour(Date.from(resultSet.getTimestamp(1).toInstant().truncatedTo(ChronoUnit.HOURS))),
+                                        1L);
+                            }
+                        }
+                )
+                .stream()
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingLong(Map.Entry::getValue)))
+                .entrySet()
+                .forEach(e -> result.add(e.getKey(), e.getValue()));
+        return result;
+    }
+
+    private TimeSeries getInputFailSeries() {
+        TimeSeries result = new TimeSeries("Input fails");
+        jdbcTemplate
+                .query("SELECT COMMAND_TIME" +
+                                " FROM COMMUNICATION_FAILS WHERE COMMAND_TIME >= :STARTING_AT AND COMMAND LIKE 'input%'",
+                        ImmutableMap.of("STARTING_AT", getStartingAt()),
+                        new RowMapper<AbstractMap.Entry<Hour, Long>>() {
+                            @Override
+                            public Map.Entry<Hour, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
+                                return new AbstractMap.SimpleImmutableEntry<>(
+                                        new Hour(Date.from(resultSet.getTimestamp(1).toInstant().truncatedTo(ChronoUnit.HOURS))),
+                                        1L);
+                            }
+                        }
+                )
+                .stream()
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingLong(Map.Entry::getValue)))
+                .entrySet()
+                .forEach(e -> result.add(e.getKey(), e.getValue()));
+        return result;
+    }
+
+    private TimeSeries getCommFailSeries() {
+        TimeSeries result = new TimeSeries("Comm fails");
+        jdbcTemplate
+                .query("SELECT COMMAND_TIME" +
+                                " FROM COMMUNICATION_FAILS WHERE COMMAND_TIME >= :STARTING_AT AND COMMAND NOT IN ('ping', " +
+                                "'input')",
+                        ImmutableMap.of("STARTING_AT", getStartingAt()),
+                        new RowMapper<AbstractMap.Entry<Hour, Long>>() {
+                            @Override
+                            public Map.Entry<Hour, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
+                                return new AbstractMap.SimpleImmutableEntry<>(
+                                        new Hour(Date.from(resultSet.getTimestamp(1).toInstant().truncatedTo(ChronoUnit.HOURS))),
+                                        1L);
+                            }
+                        }
+                )
+                .stream()
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingLong(Map.Entry::getValue)))
+                .entrySet()
+                .forEach(e -> result.add(e.getKey(), e.getValue()));
+        return result;
+    }
+
     private XYDataset getDataset() {
         TimeSeriesCollection result = new TimeSeriesCollection();
         result.addSeries(getHumiditySeries());
         result.addSeries(getLightSeries());
+        result.addSeries(getPingFailSeries());
+        result.addSeries(getCommFailSeries());
+        result.addSeries(getInputFailSeries());
 
         return result;
     }

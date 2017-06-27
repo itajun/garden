@@ -47,9 +47,10 @@ public class CommandPing implements Command
             LOGGER.warn("Ouch! Didn't receive a pong " + uniqueId);
 
             jdbcTemplate
-                    .update("INSERT INTO PING_FAILS(COMMAND_TIME) VALUES (:COMMAND_TIME)",
+                    .update("INSERT INTO COMMUNICATION_FAILS(COMMAND_TIME, COMMAND) VALUES (:COMMAND_TIME, :COMMAND)",
                             ImmutableMap.<String, Object> builder()
                                     .put("COMMAND_TIME", new Date())
+                                    .put("COMMAND", "ping")
                                     .build()
                     );
 
