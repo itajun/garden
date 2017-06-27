@@ -18,7 +18,7 @@ public class CommandLogHumidity implements Command
 {
     private static final Logger LOGGER = Logger.getLogger(CommandLogHumidity.class);
 
-    private static final int STORE_INTERVAL = 10 * 60 * 1000; // 10 minutes
+    private static final int STORE_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
@@ -46,7 +46,7 @@ public class CommandLogHumidity implements Command
                 .update("INSERT INTO HUMIDITY_LOG(READING_TIME, READING_VALUE) VALUES (:READING_TIME, :READING_VALUE)",
                         ImmutableMap.<String, Object> builder()
                                 .put("READING_TIME", new Date())
-                                .put("READING_VALUE", value)
+                                .put("READING_VALUE", 1023 - value) // Makes more sense when reading
                                 .build()
                 );
     }
