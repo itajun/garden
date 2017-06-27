@@ -8,6 +8,7 @@ Average humidity: [[*{averageHumidity}?: 'N/A']]
 Average temperature: [[*{averageTemperature}?: 'N/A']]
 Average light incidence: [[*{averageLightIncidence}?: 'N/A']]
 Communication fails: [[*{pingFails}?: 'None']]
+
 Average watering time: [[*{averageWateringTime.empty} ? 'N/A' : '']]
 [# th:each="entry : ${averageWateringTime}"]
  - pump_[[ ${entry.key} ]]: [[ ${entry.value} ]]
