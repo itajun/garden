@@ -77,7 +77,7 @@ public class CommandSendSummaryEMailHTML implements Command
                         }
                 )
                 .stream()
-                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingLong(Map.Entry::getValue)))
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingLong(Map.Entry::getValue)))
                 .entrySet()
                 .forEach(e -> result.add(e.getKey(), e.getValue()));
         return result;
@@ -99,7 +99,7 @@ public class CommandSendSummaryEMailHTML implements Command
                         }
                 )
                 .stream()
-                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingLong(Map.Entry::getValue)))
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingLong(Map.Entry::getValue)))
                 .entrySet()
                 .forEach(e -> result.add(e.getKey(), e.getValue()));
         return result;
