@@ -7,9 +7,13 @@ Some stats for this last period:
 Average humidity: [[*{averageHumidity}?: 'N/A']]
 Average temperature: [[*{averageTemperature}?: 'N/A']]
 Average light incidence: [[*{averageLightIncidence}?: 'N/A']]
-Communication fails: [[*{commandFails}?: 'None']]
 
-Average watering time: [[*{averageWateringTime.empty} ? 'N/A' : '']]
+Communication fails: [[*{commandFails.empty} ? 'None' : '']]
+[# th:each="entry : ${commandFails}"]
+ - [[ ${entry.key} ]]: [[ ${entry.value} ]]
+[/]
+
+Average watering time: [[*{averageWateringTime.empty} ? 'None in the period' : '']]
 [# th:each="entry : ${averageWateringTime}"]
  - pump_[[ ${entry.key} ]]: [[ ${entry.value} ]]
 [/]

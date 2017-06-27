@@ -106,13 +106,21 @@ public class CommandSendSummaryEMail implements Command
         }
     }
 
-    private Long commandFails() {
+    private List<Map.Entry<String, Long>> commandFails() {
         try {
             return jdbcTemplate
-                    .queryForObject("SELECT COUNT(COMMAND_TIME) FROM COMMUNICATION_FAILS WHERE COMMAND_TIME >= " +
-                                    ":LAST_READING",
+                    .query("SELECT COMMAND, COUNT(COMMAND_TIME) FROM COMMUNICATION_FAILS WHERE COMMAND_TIME >= " +
+                                    ":LAST_READING GROUP BY COMMAND",
                             ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)),
-                            Long.class
+                            new RowMapper<Map.Entry<String, Long>>()
+                            {
+                                @Override
+                                public Map.Entry<String, Long> mapRow(ResultSet resultSet, int i) throws SQLException
+                                {
+                                    return new AbstractMap.SimpleImmutableEntry<String, Long>(resultSet.getString(1)
+                                            , resultSet.getLong(2));
+                                }
+                            }
                     );
         } catch (Exception e) {
             LOGGER.error("Error fetching command fails", e);
