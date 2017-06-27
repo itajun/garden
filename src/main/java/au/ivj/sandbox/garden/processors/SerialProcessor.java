@@ -109,6 +109,7 @@ public class SerialProcessor
             }
         }
 
+        LOGGER.info("Connected to " + port);
         connected = true;
     }
 
