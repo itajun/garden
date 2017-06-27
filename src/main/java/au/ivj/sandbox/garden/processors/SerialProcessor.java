@@ -99,6 +99,8 @@ public class SerialProcessor
 
                 serialPort.addEventListener(this::serialEvent);
                 serialPort.notifyOnDataAvailable(true);
+                serialPort.enableReceiveTimeout(1000);
+                serialPort.enableReceiveThreshold(0);
             }
             catch (Exception e)
             {
@@ -188,7 +190,11 @@ public class SerialProcessor
                 String line = input.readLine();
                 commandProcessor.processLine(line);
             } catch (Exception e) {
-                LOGGER.error("Error trying to process command received from serial.", e);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.error("Error trying to process command received from serial.", e);
+                } else {
+                    LOGGER.error("Error trying to process command received from serial.");
+                }
                 jdbcTemplate
                         .update("INSERT INTO COMMUNICATION_FAILS(COMMAND_TIME, COMMAND) VALUES (:COMMAND_TIME, :COMMAND)",
                                 ImmutableMap.<String, Object> builder()
