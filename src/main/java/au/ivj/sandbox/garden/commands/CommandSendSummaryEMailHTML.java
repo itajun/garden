@@ -9,7 +9,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYSplineRenderer;
-import org.jfree.data.time.Hour;
+import org.jfree.data.time.Minute;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
@@ -31,8 +31,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -56,7 +59,7 @@ public class CommandSendSummaryEMailHTML implements Command
      * @return the starting date for the filters
      */
     private java.sql.Date getStartingAt() {
-        /*return new java.sql.Date(LocalDateTime.now().atZone(ZoneId.systemDefault()).minusHours(12)
+        /*return new java.sql.Date(LocalDateTime.now().atZone(ZoneId.systemDefault()).minusMinutes(12)
                 .toInstant().getNano());*/
         return new java.sql.Date(lastSummaryEmail);
     }
@@ -67,11 +70,11 @@ public class CommandSendSummaryEMailHTML implements Command
                 .query("SELECT READING_TIME, READING_VALUE" +
                                 " FROM HUMIDITY_LOG WHERE READING_TIME >= :STARTING_AT",
                         ImmutableMap.of("STARTING_AT", getStartingAt()),
-                        new RowMapper<AbstractMap.Entry<Hour, Long>>() {
+                        new RowMapper<AbstractMap.Entry<Minute, Long>>() {
                             @Override
-                            public Map.Entry<Hour, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
+                            public Map.Entry<Minute, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
                                 return new AbstractMap.SimpleImmutableEntry<>(
-                                        new Hour(Date.from(resultSet.getTimestamp(1).toInstant().truncatedTo(ChronoUnit.HOURS))),
+                                        new Minute(Date.from(resultSet.getTimestamp(1).toInstant())),
                                         resultSet.getLong(2));
                             }
                         }
@@ -89,11 +92,11 @@ public class CommandSendSummaryEMailHTML implements Command
                 .query("SELECT READING_TIME, READING_VALUE" +
                                 " FROM TEMPERATURE_LOG WHERE READING_TIME >= :STARTING_AT",
                         ImmutableMap.of("STARTING_AT", getStartingAt()),
-                        new RowMapper<AbstractMap.Entry<Hour, Long>>() {
+                        new RowMapper<AbstractMap.Entry<Minute, Long>>() {
                             @Override
-                            public Map.Entry<Hour, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
+                            public Map.Entry<Minute, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
                                 return new AbstractMap.SimpleImmutableEntry<>(
-                                        new Hour(Date.from(resultSet.getTimestamp(1).toInstant().truncatedTo(ChronoUnit.HOURS))),
+                                        new Minute(Date.from(resultSet.getTimestamp(1).toInstant())),
                                         resultSet.getLong(2));
                             }
                         }
@@ -111,11 +114,11 @@ public class CommandSendSummaryEMailHTML implements Command
                 .query("SELECT READING_TIME, READING_VALUE" +
                                 " FROM LIGHT_LOG WHERE READING_TIME >= :STARTING_AT",
                         ImmutableMap.of("STARTING_AT", getStartingAt()),
-                        new RowMapper<AbstractMap.Entry<Hour, Long>>() {
+                        new RowMapper<AbstractMap.Entry<Minute, Long>>() {
                             @Override
-                            public Map.Entry<Hour, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
+                            public Map.Entry<Minute, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
                                 return new AbstractMap.SimpleImmutableEntry<>(
-                                        new Hour(Date.from(resultSet.getTimestamp(1).toInstant().truncatedTo(ChronoUnit.HOURS))),
+                                        new Minute(Date.from(resultSet.getTimestamp(1).toInstant())),
                                         resultSet.getLong(2));
                             }
                         }
@@ -133,11 +136,11 @@ public class CommandSendSummaryEMailHTML implements Command
                 .query("SELECT COMMAND_TIME" +
                                 " FROM COMMUNICATION_FAILS WHERE COMMAND_TIME >= :STARTING_AT AND COMMAND LIKE 'ping%'",
                         ImmutableMap.of("STARTING_AT", getStartingAt()),
-                        new RowMapper<AbstractMap.Entry<Hour, Long>>() {
+                        new RowMapper<AbstractMap.Entry<Minute, Long>>() {
                             @Override
-                            public Map.Entry<Hour, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
+                            public Map.Entry<Minute, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
                                 return new AbstractMap.SimpleImmutableEntry<>(
-                                        new Hour(Date.from(resultSet.getTimestamp(1).toInstant().truncatedTo(ChronoUnit.HOURS))),
+                                        new Minute(Date.from(resultSet.getTimestamp(1).toInstant())),
                                         1L);
                             }
                         }
@@ -155,11 +158,11 @@ public class CommandSendSummaryEMailHTML implements Command
                 .query("SELECT COMMAND_TIME" +
                                 " FROM COMMUNICATION_FAILS WHERE COMMAND_TIME >= :STARTING_AT AND COMMAND LIKE 'input%'",
                         ImmutableMap.of("STARTING_AT", getStartingAt()),
-                        new RowMapper<AbstractMap.Entry<Hour, Long>>() {
+                        new RowMapper<AbstractMap.Entry<Minute, Long>>() {
                             @Override
-                            public Map.Entry<Hour, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
+                            public Map.Entry<Minute, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
                                 return new AbstractMap.SimpleImmutableEntry<>(
-                                        new Hour(Date.from(resultSet.getTimestamp(1).toInstant().truncatedTo(ChronoUnit.HOURS))),
+                                        new Minute(Date.from(resultSet.getTimestamp(1).toInstant())),
                                         1L);
                             }
                         }
@@ -178,11 +181,11 @@ public class CommandSendSummaryEMailHTML implements Command
                                 " FROM COMMUNICATION_FAILS WHERE COMMAND_TIME >= :STARTING_AT AND COMMAND NOT IN ('ping', " +
                                 "'input')",
                         ImmutableMap.of("STARTING_AT", getStartingAt()),
-                        new RowMapper<AbstractMap.Entry<Hour, Long>>() {
+                        new RowMapper<AbstractMap.Entry<Minute, Long>>() {
                             @Override
-                            public Map.Entry<Hour, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
+                            public Map.Entry<Minute, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
                                 return new AbstractMap.SimpleImmutableEntry<>(
-                                        new Hour(Date.from(resultSet.getTimestamp(1).toInstant().truncatedTo(ChronoUnit.HOURS))),
+                                        new Minute(Date.from(resultSet.getTimestamp(1).toInstant())),
                                         1L);
                             }
                         }
@@ -208,7 +211,7 @@ public class CommandSendSummaryEMailHTML implements Command
 
     private byte[] generateChart() throws IOException {
         JFreeChart timeSeriesChart = ChartFactory.createTimeSeriesChart("Progress",
-                "Hour",
+                "Time",
                 "Reading",
                 getDataset(),
                 true,
@@ -217,7 +220,7 @@ public class CommandSendSummaryEMailHTML implements Command
         ChartPanel chartPanel = new ChartPanel(timeSeriesChart, false);
 
         // Create plot
-        NumberAxis xAxis = new NumberAxis("Hour");
+        NumberAxis xAxis = new NumberAxis("Minute");
         NumberAxis yAxis = new NumberAxis("Value");
         XYSplineRenderer renderer = new XYSplineRenderer();
         XYPlot plot = new XYPlot(getDataset(), xAxis, yAxis, renderer);
