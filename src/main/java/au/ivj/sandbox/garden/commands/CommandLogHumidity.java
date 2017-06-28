@@ -29,7 +29,7 @@ public class CommandLogHumidity implements Command
     @Async
     public void execute(List<String> payload)
     {
-        int value = Integer.valueOf(payload.get(0));
+        int value = 1023 - Integer.valueOf(payload.get(0));  // Makes more sense when reading
         long waitFor = lastOneStored + STORE_INTERVAL - System.currentTimeMillis();
         if (waitFor > 0) {
             LOGGER.debug(String.format("Received humidity update with %d, but won't store for another %d minutes",
@@ -46,7 +46,7 @@ public class CommandLogHumidity implements Command
                 .update("INSERT INTO HUMIDITY_LOG(READING_TIME, READING_VALUE) VALUES (:READING_TIME, :READING_VALUE)",
                         ImmutableMap.<String, Object> builder()
                                 .put("READING_TIME", new Date())
-                                .put("READING_VALUE", 1023 - value) // Makes more sense when reading
+                                .put("READING_VALUE", value)
                                 .build()
                 );
     }
