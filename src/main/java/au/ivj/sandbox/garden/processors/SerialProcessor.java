@@ -101,6 +101,8 @@ public class SerialProcessor
                 serialPort.notifyOnDataAvailable(true);
                 serialPort.enableReceiveTimeout(1000);
                 serialPort.enableReceiveThreshold(0);
+                serialPort.setDTR(true);
+                serialPort.setRTS(true);
             }
             catch (Exception e)
             {
@@ -191,18 +193,22 @@ public class SerialProcessor
                 String line = input.readLine();
                 commandProcessor.processLine(line);
             } catch (Exception e) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.error("Error trying to process command received from serial.", e);
+                if (StringUtils.contains(e.getMessage(), "returned zero bytes")) {
+                    LOGGER.debug("Error due to RXTX lib bug. Ignoring", e);
                 } else {
-                    LOGGER.error("Error trying to process command received from serial.");
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.error("Error trying to process command received from serial.", e);
+                    } else {
+                        LOGGER.error("Error trying to process command received from serial.");
+                    }
+                    jdbcTemplate
+                            .update("INSERT INTO COMMUNICATION_FAILS(COMMAND_TIME, COMMAND) VALUES (:COMMAND_TIME, :COMMAND)",
+                                    ImmutableMap.<String, Object>builder()
+                                            .put("COMMAND_TIME", new Date())
+                                            .put("COMMAND", StringUtils.abbreviate("input", 100))
+                                            .build()
+                            );
                 }
-                jdbcTemplate
-                        .update("INSERT INTO COMMUNICATION_FAILS(COMMAND_TIME, COMMAND) VALUES (:COMMAND_TIME, :COMMAND)",
-                                ImmutableMap.<String, Object> builder()
-                                        .put("COMMAND_TIME", new Date())
-                                        .put("COMMAND", StringUtils.abbreviate("input", 100))
-                                        .build()
-                        );
             }
         }
         // Ignoring other events for now

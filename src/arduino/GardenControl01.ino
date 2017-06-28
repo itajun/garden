@@ -13,7 +13,7 @@ const byte PUMP_B_PIN2 = 5;
 
 const unsigned short CYCLE_SLEEP = 5000; // 5 secs
 const unsigned short CYCLES_UPDATE_SENSOR = 1; // 2,5 minutes
-const int CYCLE_PUMP_TIMEOUT = 60; // 5 minutes
+const int CYCLE_PUMP_TIMEOUT = 20; // 5 minutes
 
 int pumpACycle = 0;
 int pumpBCycle = 0;
