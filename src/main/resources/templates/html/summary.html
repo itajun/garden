@@ -19,7 +19,7 @@
 Average watering time: [[*{averageWateringTime.empty} ? 'N/A' : '']]
 </p>
 <ul>
-    <li th:each="entry : ${averageWateringTime}">- pump_[[ ${entry.key} ]]: [[ ${entry.value} ]]</li>
+    <li th:each="entry : ${averageWateringTime}">[[ ${#dates.format(entry.COMMAND_TIME, "HH:mm:ss")} ]]: pump_[[ ${entry.PUMP} ]]: [[ ${entry.PERIOD} ]]</li>
 </ul>
 <p>
     Cheers,

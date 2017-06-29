@@ -88,18 +88,11 @@ public class CommandSendSummaryEMail implements Command
         }
     }
 
-    private List<Map.Entry<String, Long>> avarageWateringTime() {
+    private List<Map<String,Object>> avarageWateringTime() {
         try {
             return jdbcTemplate
-                    .query("SELECT PUMP, AVG(PERIOD) FROM PUMP_COMMANDS WHERE COMMAND_TIME >= :LAST_READING GROUP BY PUMP",
-                            ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)),
-                            new RowMapper<Map.Entry<String, Long>>() {
-                                @Override
-                                public Map.Entry<String, Long> mapRow(ResultSet resultSet, int i) throws SQLException {
-                                    return new AbstractMap.SimpleImmutableEntry<String, Long>(resultSet.getString(1), resultSet.getLong(2));
-                                }
-                            }
-                    );
+                    .queryForList("SELECT COMMAND_TIME, PUMP, PERIOD FROM PUMP_COMMANDS WHERE COMMAND_TIME >= :LAST_READING",
+                            ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)));
         } catch (Exception e) {
             LOGGER.error("Error fetching watering time", e);
             return null;

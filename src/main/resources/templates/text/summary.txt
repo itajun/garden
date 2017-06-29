@@ -15,7 +15,7 @@ Communication fails: [[*{commandFails.empty} ? 'None' : '']]
 
 Average watering time: [[*{averageWateringTime.empty} ? 'None in the period' : '']]
 [# th:each="entry : ${averageWateringTime}"]
- - pump_[[ ${entry.key} ]]: [[ ${entry.value} ]]
+ - [[ ${#dates.format(entry.COMMAND_TIME, "HH:mm:ss")} ]]: pump_[[ ${entry.PUMP} ]]: [[ ${entry.PERIOD} ]]
 [/]
 
 I'll keep you posted.
