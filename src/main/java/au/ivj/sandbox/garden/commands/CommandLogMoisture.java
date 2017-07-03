@@ -11,12 +11,12 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Logs the humidity level received from the sensor
+ * Logs the moisture level received from the sensor
  */
-@Component(value = "command.log_humidity")
-public class CommandLogHumidity implements Command
+@Component(value = "command.log_moisture")
+public class CommandLogMoisture implements Command
 {
-    private static final Logger LOGGER = Logger.getLogger(CommandLogHumidity.class);
+    private static final Logger LOGGER = Logger.getLogger(CommandLogMoisture.class);
 
     private static final int STORE_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
@@ -32,18 +32,18 @@ public class CommandLogHumidity implements Command
         int value = 1023 - Integer.valueOf(payload.get(0));  // Makes more sense when reading
         long waitFor = lastOneStored + STORE_INTERVAL - System.currentTimeMillis();
         if (waitFor > 0) {
-            LOGGER.debug(String.format("Received humidity update with %d, but won't store for another %d minutes",
+            LOGGER.debug(String.format("Received moisture update with %d, but won't store for another %d minutes",
                     value,
                     waitFor / 1000 / 60));
             return;
         }
 
-        LOGGER.info("Will store humidity to DB " + value);
+        LOGGER.info("Will store moisture to DB " + value);
 
         lastOneStored = System.currentTimeMillis();
 
         jdbcTemplate
-                .update("INSERT INTO HUMIDITY_LOG(READING_TIME, READING_VALUE) VALUES (:READING_TIME, :READING_VALUE)",
+                .update("INSERT INTO MOISTURE_LOG(READING_TIME, READING_VALUE) VALUES (:READING_TIME, :READING_VALUE)",
                         ImmutableMap.<String, Object> builder()
                                 .put("READING_TIME", new Date())
                                 .put("READING_VALUE", value)

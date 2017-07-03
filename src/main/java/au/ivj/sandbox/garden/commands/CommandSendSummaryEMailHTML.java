@@ -64,11 +64,11 @@ public class CommandSendSummaryEMailHTML implements Command
         return new java.sql.Date(lastSummaryEmail);
     }
 
-    private TimeSeries getHumiditySeries() {
-        TimeSeries result = new TimeSeries("Humidity");
+    private TimeSeries getMoistureSeries() {
+        TimeSeries result = new TimeSeries("Moisture");
         jdbcTemplate
                 .query("SELECT READING_TIME, READING_VALUE" +
-                                " FROM HUMIDITY_LOG WHERE READING_TIME >= :STARTING_AT",
+                                " FROM MOISTURE_LOG WHERE READING_TIME >= :STARTING_AT",
                         ImmutableMap.of("STARTING_AT", getStartingAt()),
                         new RowMapper<AbstractMap.Entry<Minute, Long>>() {
                             @Override
@@ -199,7 +199,7 @@ public class CommandSendSummaryEMailHTML implements Command
 
     private XYDataset getDataset() {
         TimeSeriesCollection result = new TimeSeriesCollection();
-        result.addSeries(getHumiditySeries());
+        result.addSeries(getMoistureSeries());
         result.addSeries(getLightSeries());
         result.addSeries(getTemperatureSeries());
         result.addSeries(getPingFailSeries());

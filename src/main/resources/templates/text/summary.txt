@@ -4,7 +4,7 @@ This is your update since [[*{lastUpdate} ? ${#dates.format(lastUpdate, "HH:mm:s
 
 Some stats for this last period:
 
-Average humidity: [[*{averageHumidity}?: 'N/A']]
+Average moisture: [[*{averageMoisture}?: 'N/A']]
 Average temperature: [[*{averageTemperature}?: 'N/A']]
 Average light incidence: [[*{averageLightIncidence}?: 'N/A']]
 

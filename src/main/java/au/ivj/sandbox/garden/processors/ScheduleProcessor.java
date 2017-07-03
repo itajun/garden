@@ -42,16 +42,16 @@ public class ScheduleProcessor {
 
     @Scheduled(cron = "${schedule.water.pump_a.cron}")
     public void pumpA() {
-        if (MoreObjects.firstNonNull(getLastHumidityReading(), pumpAThreshold) <= pumpAThreshold) {
+        if (MoreObjects.firstNonNull(getLastMoistureReading(), pumpAThreshold) <= pumpAThreshold) {
             commandProcessor.processLine("pump a");
         } else {
-            LOGGER.info(String.format("Won't turn pump a on because humidity reading is less than %d", pumpAThreshold));
+            LOGGER.info(String.format("Won't turn pump a on because moisture reading is less than %d", pumpAThreshold));
         }
     }
 
-    private Long getLastHumidityReading() {
+    private Long getLastMoistureReading() {
         return jdbcTemplate
-                .query("SELECT READING_VALUE FROM HUMIDITY_LOG ORDER BY READING_TIME DESC",
+                .query("SELECT READING_VALUE FROM MOISTURE_LOG ORDER BY READING_TIME DESC",
                         Collections.emptyMap(),
                         new ResultSetExtractor<Long>() {
                             @Override

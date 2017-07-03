@@ -39,7 +39,7 @@ public class CommandSendSummaryEMail implements Command
     {
         Map<String, Object> context = new HashMap<>();
         context.put("lastUpdate", lastSummaryEmail == 0 ? null : new Date(lastSummaryEmail));
-        context.put("averageHumidity", avarageHumidity());
+        context.put("averageMoisture", avarageMoisture());
         context.put("averageLightIncidence", avarageLightIncidence());
         context.put("averageTemperature", avarageTemperature());
         context.put("averageWateringTime", avarageWateringTime());
@@ -48,15 +48,15 @@ public class CommandSendSummaryEMail implements Command
         lastSummaryEmail = System.currentTimeMillis();
     }
 
-    private Long avarageHumidity() {
+    private Long avarageMoisture() {
         try {
             return jdbcTemplate
-                    .queryForObject("SELECT AVG(READING_VALUE) FROM HUMIDITY_LOG WHERE READING_TIME >= :LAST_READING",
+                    .queryForObject("SELECT AVG(READING_VALUE) FROM MOISTURE_LOG WHERE READING_TIME >= :LAST_READING",
                             ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)),
                             Long.class
                     );
         } catch (Exception e) {
-            LOGGER.error("Error fetching humidity", e);
+            LOGGER.error("Error fetching moisture", e);
             return null;
         }
     }
@@ -69,7 +69,7 @@ public class CommandSendSummaryEMail implements Command
                             Long.class
                     );
         } catch (Exception e) {
-            LOGGER.error("Error fetching humidity", e);
+            LOGGER.error("Error fetching moisture", e);
             return null;
         }
     }
@@ -83,7 +83,7 @@ public class CommandSendSummaryEMail implements Command
                             Long.class
                     );
         } catch (Exception e) {
-            LOGGER.error("Error fetching humidity", e);
+            LOGGER.error("Error fetching moisture", e);
             return null;
         }
     }

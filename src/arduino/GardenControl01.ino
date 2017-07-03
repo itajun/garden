@@ -2,7 +2,7 @@
 
 const byte LED_PIN = 13;
 
-const byte HUMIDITY_INPUT_PIN = 0;
+const byte MOISTURE_INPUT_PIN = 0;
 const byte LIGHT_INPUT_PIN = 5;
 
 const byte PUMP_A_PIN1 = 3;
@@ -31,13 +31,13 @@ void setup()
     pinMode(PUMP_A_PIN2, OUTPUT);
     pinMode(PUMP_B_PIN1, OUTPUT);
     pinMode(PUMP_B_PIN2, OUTPUT);
-    pinMode(HUMIDITY_INPUT_PIN, INPUT);
+    pinMode(MOISTURE_INPUT_PIN, INPUT);
 }
 
 void updateSensorValues() {
 	if (sensorCycle >= CYCLES_UPDATE_SENSOR) {
-		unsigned short humidity = analogRead(HUMIDITY_INPUT_PIN);
-		sendMessage("log_humidity " + String(humidity));
+		unsigned short moisture = analogRead(MOISTURE_INPUT_PIN);
+		sendMessage("log_moisture " + String(moisture));
 
 		unsigned short light = analogRead(LIGHT_INPUT_PIN);
 		sendMessage("log_light " + String(light));

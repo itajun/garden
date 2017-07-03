@@ -38,7 +38,7 @@ public class CommandLogTemperature implements Command
             return;
         }
 
-        LOGGER.info("Will store humidity to DB " + value);
+        LOGGER.info("Will store moisture to DB " + value);
 
         lastOneStored = System.currentTimeMillis();
 
