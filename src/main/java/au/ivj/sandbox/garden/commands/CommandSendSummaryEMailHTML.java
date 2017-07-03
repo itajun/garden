@@ -31,8 +31,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.AbstractMap;
-import java.util.Date;
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,15 +56,17 @@ public class CommandSendSummaryEMailHTML implements Command
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
 
-    private long lastSummaryEmail = 0;
+    private Date lastSummaryEmail = new Date(LocalDate.now()
+            .atTime(0,0,0,0)
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .getNano());
 
     /**
      * @return the starting date for the filters
      */
     private java.sql.Date getStartingAt() {
-        /*return new java.sql.Date(LocalDateTime.now().atZone(ZoneId.systemDefault()).minusMinutes(12)
-                .toInstant().getNano());*/
-        return new java.sql.Date(lastSummaryEmail);
+        return lastSummaryEmail;
     }
 
     private TimeSeries getMoistureSeries() {
@@ -247,7 +252,7 @@ public class CommandSendSummaryEMailHTML implements Command
         try {
             return jdbcTemplate
                     .queryForList("SELECT COMMAND_TIME, PUMP, PERIOD FROM PUMP_COMMANDS WHERE COMMAND_TIME >= :LAST_READING",
-                            ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)));
+                            ImmutableMap.of("LAST_READING", lastSummaryEmail));
         } catch (Exception e) {
             LOGGER.error("Error fetching watering time", e);
             return null;
@@ -259,7 +264,7 @@ public class CommandSendSummaryEMailHTML implements Command
     public void execute(List<String> payload)
     {
         Map<String, Object> context = new HashMap<>();
-        context.put("lastUpdate", lastSummaryEmail == 0 ? null : new Date(lastSummaryEmail));
+        context.put("lastUpdate", getStartingAt());
         context.put("averageWateringTime", avarageWateringTime());
         try
         {
@@ -280,6 +285,6 @@ public class CommandSendSummaryEMailHTML implements Command
                 }
             }
         });
-        lastSummaryEmail = System.currentTimeMillis();
+        lastSummaryEmail = new Date(Instant.now().getNano());
     }
 }
