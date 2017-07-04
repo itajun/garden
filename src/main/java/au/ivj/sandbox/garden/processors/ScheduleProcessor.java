@@ -10,6 +10,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -29,6 +35,9 @@ public class ScheduleProcessor {
 
     @Value("${schedule.water.pump_a.threshold}")
     Long pumpAThreshold;
+
+    @Value("${schedule.post2Cloud.url}")
+    String post2CloudURL;
 
     @Scheduled(cron = "${schedule.email.summary.cron}")
     public void summaryEMail() {
@@ -62,6 +71,32 @@ public class ScheduleProcessor {
                 );
     }
 
+    private Long getLastLightReading() {
+        return jdbcTemplate
+                .query("SELECT READING_VALUE FROM LIGHT_LOG ORDER BY READING_TIME DESC",
+                        Collections.emptyMap(),
+                        new ResultSetExtractor<Long>() {
+                            @Override
+                            public Long extractData(ResultSet resultSet) throws SQLException, DataAccessException {
+                                return resultSet.next() ? resultSet.getLong(1) : null;
+                            }
+                        }
+                );
+    }
+
+    private Long getLastTemperatureReading() {
+        return jdbcTemplate
+                .query("SELECT READING_VALUE FROM TEMPERATURE_LOG ORDER BY READING_TIME DESC",
+                        Collections.emptyMap(),
+                        new ResultSetExtractor<Long>() {
+                            @Override
+                            public Long extractData(ResultSet resultSet) throws SQLException, DataAccessException {
+                                return resultSet.next() ? resultSet.getLong(1) : null;
+                            }
+                        }
+                );
+    }
+
     @Scheduled(cron = "${schedule.water.pump_b.cron}")
     public void pumpB() {
         commandProcessor.processLine("pump b");
@@ -70,5 +105,18 @@ public class ScheduleProcessor {
     @Scheduled(cron = "${schedule.ping.cron}")
     public void ping() {
         commandProcessor.processLine("ping");
+    }
+
+    @Scheduled(cron = "${schedule.post2Cloud.cron}")
+    public void post3Cloud() throws IOException {
+        URL url = new URL(String.format("%s?temperature=%d&light=%d&moisture=%s", post2CloudURL, getLastTemperatureReading(), getLastLightReading(), getLastMoistureReading()));
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        String line;
+        while ((line = rd.readLine()) != null) {
+            LOGGER.error("Received from server: " + line);
+        }
+        rd.close();
     }
 }
