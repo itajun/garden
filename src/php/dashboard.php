@@ -9,7 +9,7 @@
 
 		  // 4. Retrieve the raw JSON data
 		  var jsonData = $.ajax({
-			url: 'fetch_content.php?readingTime=now%20-50%20minutes',
+			url: 'fetch_content.php?readingTime=now%20-12%20hours',
 			dataType: 'json',
 		  }).done(function (results) {
 
@@ -57,6 +57,6 @@
 	</script>
   </head>
   <body>
-    <div id="chart" style="width: 800px; height: 600px;"></div>
+    <div id="chart" style="width: 600px; height: 400px;"></div>
   </body>
 </html>
