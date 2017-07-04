@@ -60,7 +60,7 @@ public class CommandSendSummaryEMailHTML implements Command
             .atTime(0,0,0,0)
             .atZone(ZoneId.systemDefault())
             .toInstant()
-            .getNano());
+            .toEpochMilli());
 
     /**
      * @return the starting date for the filters
@@ -285,6 +285,6 @@ public class CommandSendSummaryEMailHTML implements Command
                 }
             }
         });
-        lastSummaryEmail = new Date(Instant.now().getNano());
+        lastSummaryEmail = new Date(Instant.now().toEpochMilli());
     }
 }
