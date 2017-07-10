@@ -5,10 +5,12 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,6 +21,7 @@ import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.Date;
 
 /**
  * Config various scheduled services
@@ -108,15 +111,21 @@ public class ScheduleProcessor {
     }
 
     @Scheduled(cron = "${schedule.post2Cloud.cron}")
-    public void post3Cloud() throws IOException {
-        URL url = new URL(String.format("%s?temperature=%d&light=%d&moisture=%s", post2CloudURL, getLastTemperatureReading(), getLastLightReading(), getLastMoistureReading()));
+    public void post2Cloud() throws IOException {
+        URL url = new URL(String.format(post2CloudURL, "Temperature", getLastTemperatureReading(), new Date()));
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        String line;
-        while ((line = rd.readLine()) != null) {
-            LOGGER.error("Received from server: " + line);
+        if (conn.getResponseCode() != HttpStatus.OK.value()) {
+            LOGGER.error("Error submitting temperature to server");
         }
-        rd.close();
+        url = new URL(String.format(post2CloudURL, "Light", getLastLightReading(), new Date()));
+        conn = (HttpURLConnection) url.openConnection();
+        if (conn.getResponseCode() != HttpStatus.OK.value()) {
+            LOGGER.error("Error submitting light to server");
+        }
+        url = new URL(String.format(post2CloudURL, "Moisture", getLastMoistureReading(), new Date()));
+        conn = (HttpURLConnection) url.openConnection();
+        if (conn.getResponseCode() != HttpStatus.OK.value()) {
+            LOGGER.error("Error submitting data to server");
+        }
     }
 }

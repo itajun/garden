@@ -9,6 +9,7 @@
 
 		  // 4. Retrieve the raw JSON data
 		  var jsonData = $.ajax({
+			cache: false,
 			url: 'fetch_content.php?readingTime=now%20-12%20hours',
 			dataType: 'json',
 		  }).done(function (results) {
@@ -26,9 +27,9 @@
 			results.forEach(function(row) {
 			  data.addRow([
 				  (new Date(row.readingTime)),
-				  parseFloat(row.temperature),
-				  parseFloat(row.light),
-				  parseFloat(row.moisture),
+				  parseFloat(row.temperature == 'null' ? 0 : row.temperature ),
+				  parseFloat(row.light == 'null' ? 0 : row.light ),
+				  parseFloat(row.moisture == 'null' ? 0 : row.moisture)
 				]);
 			});
 
