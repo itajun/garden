@@ -20,6 +20,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Date;
 
@@ -112,20 +114,21 @@ public class ScheduleProcessor {
 
     @Scheduled(cron = "${schedule.post2Cloud.cron}")
     public void post2Cloud() throws IOException {
-        URL url = new URL(String.format(post2CloudURL, "Temperature", getLastTemperatureReading(), new Date()));
+        String date = DateTimeFormatter.ofPattern("ddMMyyyyHHmmss").format(LocalDateTime.now());
+        URL url = new URL(String.format(post2CloudURL, "Temperature", getLastTemperatureReading(), date));
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         if (conn.getResponseCode() != HttpStatus.OK.value()) {
             LOGGER.error("Error submitting temperature to server");
         }
-        url = new URL(String.format(post2CloudURL, "Light", getLastLightReading(), new Date()));
+        url = new URL(String.format(post2CloudURL, "Light", getLastLightReading(), date));
         conn = (HttpURLConnection) url.openConnection();
         if (conn.getResponseCode() != HttpStatus.OK.value()) {
             LOGGER.error("Error submitting light to server");
         }
-        url = new URL(String.format(post2CloudURL, "Moisture", getLastMoistureReading(), new Date()));
+        url = new URL(String.format(post2CloudURL, "Moisture", getLastMoistureReading(), date));
         conn = (HttpURLConnection) url.openConnection();
         if (conn.getResponseCode() != HttpStatus.OK.value()) {
-            LOGGER.error("Error submitting data to server");
+            LOGGER.error("Error submitting moisture to server");
         }
     }
 }
