@@ -3,10 +3,14 @@ package au.ivj.sandbox.garden.commands;
 import com.google.common.collect.ImmutableMap;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +23,9 @@ public class CommandLogLight implements Command
     private static final Logger LOGGER = Logger.getLogger(CommandLogLight.class);
 
     private static final int STORE_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+    @Value("${iot.url}")
+    private String iotURL;
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
@@ -49,5 +56,15 @@ public class CommandLogLight implements Command
                                 .put("READING_VALUE", value)
                                 .build()
                 );
+
+        try {
+            URL obj = new URL(String.format(iotURL, "Laptop", "Light", value, new Date()));
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+            LOGGER.debug("Response Code from IOT sync: " + con.getResponseCode());
+        }
+        catch (IOException e)
+        {
+            LOGGER.warn("Error synchronizing with IOT server", e);
+        }
     }
 }
