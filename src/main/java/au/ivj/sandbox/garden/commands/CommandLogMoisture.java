@@ -14,7 +14,7 @@ import java.util.List;
  * Logs the moisture level received from the sensor
  */
 @Component(value = "command.log_moisture")
-public class CommandLogMoisture implements Command
+public class CommandLogMoisture extends CloudSyncCommand implements Command
 {
     private static final Logger LOGGER = Logger.getLogger(CommandLogMoisture.class);
 
@@ -49,5 +49,8 @@ public class CommandLogMoisture implements Command
                                 .put("READING_VALUE", value)
                                 .build()
                 );
+
+        post2Cloud(String.format("postReading?device=Laptop&sensor=Moisture&value=%d&when=%s", value, TIMESTAMP_FORMAT
+                .format(new Date())));
     }
 }

@@ -19,7 +19,7 @@ import java.util.List;
  */
 @Component(value = "command.ping")
 @Scope("prototype")
-public class CommandPing implements Command
+public class CommandPing extends CloudSyncCommand implements Command
 {
     private static final Logger LOGGER = Logger.getLogger(CommandPing.class);
     public static final int TIMEOUT = 30_000;
@@ -55,5 +55,8 @@ public class CommandPing implements Command
                     );
 
         }
+
+        post2Cloud(String.format("postLog?device=Laptop&group=ping&details=%s&when=%s", commandCallback
+                        .isPresent() ? "OK" : "FAILED", TIMESTAMP_FORMAT.format(new Date())));
     }
 }

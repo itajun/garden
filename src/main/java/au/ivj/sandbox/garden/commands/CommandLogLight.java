@@ -3,14 +3,10 @@ package au.ivj.sandbox.garden.commands;
 import com.google.common.collect.ImmutableMap;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Date;
 import java.util.List;
 
@@ -18,14 +14,11 @@ import java.util.List;
  * Logs the light level received from the sensor
  */
 @Component(value = "command.log_light")
-public class CommandLogLight implements Command
+public class CommandLogLight extends CloudSyncCommand implements Command
 {
     private static final Logger LOGGER = Logger.getLogger(CommandLogLight.class);
 
     private static final int STORE_INTERVAL = 5 * 60 * 1000; // 5 minutes
-
-    @Value("${iot.url}")
-    private String iotURL;
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
@@ -57,14 +50,7 @@ public class CommandLogLight implements Command
                                 .build()
                 );
 
-        try {
-            URL obj = new URL(String.format(iotURL, "Laptop", "Light", value, new Date()));
-            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-            LOGGER.debug("Response Code from IOT sync: " + con.getResponseCode());
-        }
-        catch (IOException e)
-        {
-            LOGGER.warn("Error synchronizing with IOT server", e);
-        }
+        post2Cloud(String.format("postReading?device=Laptop&sensor=Light&value=%d&when=%s", value, TIMESTAMP_FORMAT
+                .format(new Date())));
     }
 }

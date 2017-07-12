@@ -14,7 +14,7 @@ import java.util.List;
  * Logs the temperature level received from the sensor
  */
 @Component(value = "command.log_temperature")
-public class CommandLogTemperature implements Command
+public class CommandLogTemperature extends CloudSyncCommand implements Command
 {
     private static final Logger LOGGER = Logger.getLogger(CommandLogTemperature.class);
 
@@ -50,5 +50,8 @@ public class CommandLogTemperature implements Command
                                 .put("READING_VALUE", value)
                                 .build()
                 );
+
+        post2Cloud(String.format("postReading?device=Laptop&sensor=Temperature&value=%d&when=%s", value,
+                TIMESTAMP_FORMAT.format(new Date())));
     }
 }

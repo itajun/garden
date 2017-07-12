@@ -19,7 +19,7 @@ import java.util.List;
 @Component(value = "command.pump")
 @Scope("prototype")
 @ConfigurationProperties("pump")
-public class CommandPump implements Command
+public class CommandPump extends CloudSyncCommand implements Command
 {
     private static final Logger LOGGER = Logger.getLogger(CommandPump.class);
 
@@ -76,5 +76,8 @@ public class CommandPump implements Command
                                 .put("PERIOD", period)
                                 .build()
                 );
+
+        post2Cloud(String.format("postLog?device=Laptop&group=pump&details=pump+%s+for+%ds&when=%s", pump,
+                period/1000, TIMESTAMP_FORMAT.format(new Date())));
     }
 }
