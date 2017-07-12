@@ -5,14 +5,25 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Date;
 
 /**
  * Config various scheduled services
@@ -29,6 +40,9 @@ public class ScheduleProcessor {
 
     @Value("${schedule.water.pump_a.threshold}")
     Long pumpAThreshold;
+
+    @Value("${schedule.post2Cloud.url}")
+    String post2CloudURL;
 
     @Scheduled(cron = "${schedule.email.summary.cron}")
     public void summaryEMail() {
@@ -62,6 +76,32 @@ public class ScheduleProcessor {
                 );
     }
 
+    private Long getLastLightReading() {
+        return jdbcTemplate
+                .query("SELECT READING_VALUE FROM LIGHT_LOG ORDER BY READING_TIME DESC",
+                        Collections.emptyMap(),
+                        new ResultSetExtractor<Long>() {
+                            @Override
+                            public Long extractData(ResultSet resultSet) throws SQLException, DataAccessException {
+                                return resultSet.next() ? resultSet.getLong(1) : null;
+                            }
+                        }
+                );
+    }
+
+    private Long getLastTemperatureReading() {
+        return jdbcTemplate
+                .query("SELECT READING_VALUE FROM TEMPERATURE_LOG ORDER BY READING_TIME DESC",
+                        Collections.emptyMap(),
+                        new ResultSetExtractor<Long>() {
+                            @Override
+                            public Long extractData(ResultSet resultSet) throws SQLException, DataAccessException {
+                                return resultSet.next() ? resultSet.getLong(1) : null;
+                            }
+                        }
+                );
+    }
+
     @Scheduled(cron = "${schedule.water.pump_b.cron}")
     public void pumpB() {
         commandProcessor.processLine("pump b");
@@ -70,5 +110,25 @@ public class ScheduleProcessor {
     @Scheduled(cron = "${schedule.ping.cron}")
     public void ping() {
         commandProcessor.processLine("ping");
+    }
+
+    @Scheduled(cron = "${schedule.post2Cloud.cron}")
+    public void post2Cloud() throws IOException {
+        String date = DateTimeFormatter.ofPattern("ddMMyyyyHHmmss").format(LocalDateTime.now());
+        URL url = new URL(String.format(post2CloudURL, "Temperature", getLastTemperatureReading(), date));
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        if (conn.getResponseCode() != HttpStatus.OK.value()) {
+            LOGGER.error("Error submitting temperature to server");
+        }
+        url = new URL(String.format(post2CloudURL, "Light", getLastLightReading(), date));
+        conn = (HttpURLConnection) url.openConnection();
+        if (conn.getResponseCode() != HttpStatus.OK.value()) {
+            LOGGER.error("Error submitting light to server");
+        }
+        url = new URL(String.format(post2CloudURL, "Moisture", getLastMoistureReading(), date));
+        conn = (HttpURLConnection) url.openConnection();
+        if (conn.getResponseCode() != HttpStatus.OK.value()) {
+            LOGGER.error("Error submitting moisture to server");
+        }
     }
 }

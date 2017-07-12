@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.AbstractMap;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,28 +34,32 @@ public class CommandSendSummaryEMail implements Command
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
 
-    private long lastSummaryEmail = 0;
+    private java.sql.Date lastSummaryEmail = new java.sql.Date(LocalDate.now()
+            .atTime(0,0,0,0)
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli());
 
     @Override
     @Async
     public void execute(List<String> payload)
     {
         Map<String, Object> context = new HashMap<>();
-        context.put("lastUpdate", lastSummaryEmail == 0 ? null : new Date(lastSummaryEmail));
+        context.put("lastUpdate", lastSummaryEmail);
         context.put("averageMoisture", avarageMoisture());
         context.put("averageLightIncidence", avarageLightIncidence());
         context.put("averageTemperature", avarageTemperature());
         context.put("averageWateringTime", avarageWateringTime());
         context.put("commandFails", commandFails());
         eMailProcesor.sendEMail(EMailProcessor.EMailTemplate.SUMMARY, context);
-        lastSummaryEmail = System.currentTimeMillis();
+        lastSummaryEmail = new java.sql.Date(Instant.now().toEpochMilli());
     }
 
     private Long avarageMoisture() {
         try {
             return jdbcTemplate
                     .queryForObject("SELECT AVG(READING_VALUE) FROM MOISTURE_LOG WHERE READING_TIME >= :LAST_READING",
-                            ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)),
+                            ImmutableMap.of("LAST_READING", lastSummaryEmail),
                             Long.class
                     );
         } catch (Exception e) {
@@ -65,7 +72,7 @@ public class CommandSendSummaryEMail implements Command
         try {
             return jdbcTemplate
                     .queryForObject("SELECT AVG(READING_VALUE) FROM LIGHT_LOG WHERE READING_TIME >= :LAST_READING",
-                            ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)),
+                            ImmutableMap.of("LAST_READING", lastSummaryEmail),
                             Long.class
                     );
         } catch (Exception e) {
@@ -79,7 +86,7 @@ public class CommandSendSummaryEMail implements Command
             return jdbcTemplate
                     .queryForObject("SELECT AVG(READING_VALUE) FROM TEMPERATURE_LOG WHERE READING_TIME >= " +
                                     ":LAST_READING",
-                            ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)),
+                            ImmutableMap.of("LAST_READING", lastSummaryEmail),
                             Long.class
                     );
         } catch (Exception e) {
@@ -92,7 +99,7 @@ public class CommandSendSummaryEMail implements Command
         try {
             return jdbcTemplate
                     .queryForList("SELECT COMMAND_TIME, PUMP, PERIOD FROM PUMP_COMMANDS WHERE COMMAND_TIME >= :LAST_READING",
-                            ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)));
+                            ImmutableMap.of("LAST_READING", lastSummaryEmail));
         } catch (Exception e) {
             LOGGER.error("Error fetching watering time", e);
             return null;
@@ -104,7 +111,7 @@ public class CommandSendSummaryEMail implements Command
             return jdbcTemplate
                     .query("SELECT COMMAND, COUNT(COMMAND_TIME) FROM COMMUNICATION_FAILS WHERE COMMAND_TIME >= " +
                                     ":LAST_READING GROUP BY COMMAND",
-                            ImmutableMap.of("LAST_READING", new Date(lastSummaryEmail)),
+                            ImmutableMap.of("LAST_READING", lastSummaryEmail),
                             new RowMapper<Map.Entry<String, Long>>()
                             {
                                 @Override
