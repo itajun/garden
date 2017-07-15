@@ -45,7 +45,7 @@ public class ScheduleProcessor {
         if (MoreObjects.firstNonNull(getLastMoistureReading(), pumpAThreshold) <= pumpAThreshold) {
             commandProcessor.processLine("pump a");
         } else {
-            LOGGER.info(String.format("Won't turn pump a on because moisture reading is less than %d", pumpAThreshold));
+            LOGGER.info(String.format("Won't turn pump a on because moisture reading is greater than %d", pumpAThreshold));
         }
     }
 

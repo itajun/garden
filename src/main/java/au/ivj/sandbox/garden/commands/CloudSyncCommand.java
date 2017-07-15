@@ -19,12 +19,21 @@ public abstract class CloudSyncCommand implements Command
     @Value("${post2Cloud.url}")
     String post2CloudURL;
 
+    @Value("${post2Cloud.user}")
+    String post2CloudUser;
+
+    @Value("${post2Cloud.pass}")
+    String post2CloudPassword;
+
     protected void post2Cloud(String contextAndParams) {
         try
         {
             String date = DateTimeFormatter.ofPattern("ddMMyyyyHHmmss").format(LocalDateTime.now());
             URL url = new URL(post2CloudURL + contextAndParams);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            String userPassword = post2CloudUser + ":" + post2CloudPassword;
+            String encoding = new sun.misc.BASE64Encoder().encode(userPassword.getBytes());
+            conn.setRequestProperty("Authorization", "Basic " + encoding);
             if (conn.getResponseCode() != HttpStatus.OK.value())
             {
                 throw new IllegalStateException("Response code was " + conn.getResponseCode());
